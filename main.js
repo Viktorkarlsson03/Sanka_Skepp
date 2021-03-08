@@ -69,7 +69,6 @@ function Ship(name){
 	}
 }
 
-// Console obj
 var output = {
 	"welcome": " > Welcome to BattleShip.  Use the menu above to get started.",
 	"not": " > This option is not currently available.",
@@ -84,7 +83,6 @@ var output = {
 	lost: function(name) { return " > " + name + " has lost his fleet!!  Game Over." },
 };
 
-// Objects for playing the game and bot for playing the computer
 var topBoard = {
 	allHits: [],
 	highlight: function(square) {
@@ -102,12 +100,11 @@ var topBoard = {
 					$(this).children().addClass("miss");
 				} else $(this).children().addClass("hit");
 				$(".top").find(".points").off("mouseenter").off("mouseover").off("mouseleave").off("click");
-				// Check if it's the end of the game
 				if (cpuFleet.ships.length == 0) {
  					$(".top").find(".points").off("mouseenter").off("mouseover").off("mouseleave").off("click");
 
  				} else setTimeout(bot.select, 800);
-			} // end of if
+			}
 		});
 	},
 }
@@ -116,22 +113,17 @@ var bottomBoard = {
 	currentHits: [],
 	checkAttempt: function(hit) {
 		if (playerFleet.checkIfHit(hit)) {
-			// Insert hit into an array for book keeping
 			bottomBoard.currentHits.push(hit);
       if (this.currentHits.length > 1) bot.prev_hit = true;
-			// display hit on the grid
 			$(".bottom").find("." + hit).children().addClass("hit");
 			if (bottomBoard.hasShipBeenSunk()) {
-				// clear flags
 				bot.hunting = bot.prev_hit = false;
 				if (bot.sizeOfShipSunk == bottomBoard.currentHits.length) {
 					bot.num_misses = bot.back_count = bot.nextMove.length = bottomBoard.currentHits.length = bot.sizeOfShipSunk = bot.currrent = 0;
 				} else {
 					bot.special =  bot.case1 = true;
 				}
-				// check for special cases
 				if (bot.specialHits.length > 0) bot.special = true;
-				// check for end of game.	
 			}
 			return true;
 		} else {
@@ -184,11 +176,9 @@ var bot = {
 		} else if (bot.special) {
 			bot.specialCase();
 		} else {
-			// grab a random number from the pool and increase attempts
 			bot.current = bot.randPool[bot.randomGen(bot.randPool.length)];
 			bot.attempted.push(bot.current);
 			bot.first_hit = true;
-			// remove current guess from the random pool and check if hit
 			bot.removeGuess(bot.randPool.indexOf(bot.current));
 			bot.hunting = bottomBoard.checkAttempt(bot.current);
 		}
@@ -266,27 +256,22 @@ var bot = {
 
 	getRandomMoves: function(possibleMoves) {
 		while (possibleMoves.length != 0) {
-			// pick a random direction
 			var dir = bot.randomGen(possibleMoves.length);
-			// Go Up
 			if (possibleMoves[dir] == "up") {
 				if (bot.randPool.some(function(x) { return x == bot.current - 10; })) {
 					bot.nextMove.push("up");
 				}
 			}
-			// Go right
 			if (possibleMoves[dir] == "right") {
 				if (bot.randPool.some(function(x) { return x == bot.current + 1; })) {
 					bot.nextMove.push("right");
 				}
 			}
-			// Go down
 			if (possibleMoves[dir] == "down") {
 				if (bot.randPool.some(function(x) { return x == bot.current + 10; })) {
 					bot.nextMove.push("down");
 				}
 			}
-			// Go left
 			if (possibleMoves[dir] == "left") {
 				if (bot.randPool.some(function(x) { return x == bot.current - 1; })) {
 					bot.nextMove.push("left");
@@ -302,7 +287,6 @@ var bot = {
 		if (dir == "down") bot.current += 10;
 		if (dir == "left") bot.current -= 1;
 		console.log(bot.current + " attempted " + bot.attempted);
-		// check if already used
 		if (bot.attempted.some(function(x) { return x == bot.current; }) && bot.specialHits.length == 0) {
 			bot.current = bottomBoard.currentHits[0];
 			if (bot.back_count > 1) bot.special = true;
@@ -473,10 +457,8 @@ var bot = {
 	}
 }
 
-//  Create the games grids and layout
 $(document).ready(function() {
 	for (var i = 1; i <= 100; i++) {
-		// The number and letter designators
 		if (i < 11) {
 			$(".top").prepend("<span class='aTops'>" + Math.abs(i - 11) + "</span>");
 			$(".bottom").prepend("<span class='aTops'>" + Math.abs(i - 11) + "</span>");
@@ -498,7 +480,6 @@ $(document).ready(function() {
 	$(".text").text(output.welcome);
 })
 
-// Start the game setup
 $(document).ready(function() {
 	$(".one").on("click", function() {
 		$(".text").text(output.player1);
@@ -541,24 +522,19 @@ function selfSetup() {
 	$(".self").addClass("horz").removeClass("self").text("Horizontal");
 	$(".random").addClass("vert").removeClass("random").text("Vertical");
 	
-	// initialize the fleet
 	playerFleet = new Fleet("Player 1");
 	playerFleet.initShips();
-	// light up the players ship board for placement
 	placeShip(playerFleet.ships[playerFleet.currentShip], playerFleet);
 }
 
 function randomSetup(fleet) {
-	// Decide if the ship will be placed vertically or horizontally 
-	// if 0 then ship will be places horizontally if 1 vertically
-	// setShip(location, ship, "vert", fleet, "self");
-	if (fleet.currentShip >= fleet.numOfShips) return; // regard against undefined length
+
+	if (fleet.currentShip >= fleet.numOfShips) return;
 	
 	var orien = Math.floor((Math.random() * 10) + 1);
 	var length = fleet.ships[fleet.currentShip].length;
 	
 	if (orien < 6) {
-		// create a random number betwee 1 and 6
 		var shipOffset = 11 - fleet.ships[fleet.currentShip].length; 
 		var horiz = Math.floor((Math.random() * shipOffset) + 1);
 		var vert = Math.floor(Math.random() * 9);
@@ -575,7 +551,6 @@ function randomSetup(fleet) {
 }
 
 function createCpuFleet() {
-	// create a random ship placement for the cpu's fleet
 	cpuFleet = new Fleet("CPU");
 	cpuFleet.initShips();
 	randomSetup(cpuFleet);
@@ -583,7 +558,6 @@ function createCpuFleet() {
 
 
 function placeShip(ship, fleet) {
-	// check orientation of ship and highlight accordingly
 	var orientation = "horz";
 	$(".vert").off("click").on("click", function() {
 		orientation = "vert";
@@ -591,11 +565,8 @@ function placeShip(ship, fleet) {
 	$(".horz").off("click").on("click", function() {
 		orientation = "horz";
 	});
-	// when the user enters the grid have the ships lenght highlighted with the
-	// ships length.
 	$(".bottom").find(".points").off("mouseenter").on("mouseenter", function() {
 		var num = $(this).attr('class').slice(15);
-		//
 		if (orientation == "horz") displayShipHorz(parseInt(num), ship, this, fleet);
 		else displayShipVert(parseInt(num), ship, this, fleet);
 	});
@@ -660,7 +631,6 @@ function setShip(location, ship, orientation, genericFleet, type) {
 			if (++genericFleet.currentShip == genericFleet.numOfShips) {
 				$(".text").text(output.placed("ships have"));
 				$(".bottom").find(".points").off("mouseenter");
-				// clear the call stack
 				setTimeout(createCpuFleet, 100);
 			} else {
 				if (type == "random") randomSetup(genericFleet);
@@ -679,7 +649,6 @@ function setShip(location, ship, orientation, genericFleet, type) {
 			if (++genericFleet.currentShip == genericFleet.numOfShips) {
 				$(".text").text(output.placed("ships have"));
 				$(".bottom").find(".points").off("mouseenter");
-				// clear the call stack
 				setTimeout(createCpuFleet, 100);
 			} else {
 				if (type == "random") randomSetup(genericFleet);
@@ -690,8 +659,7 @@ function setShip(location, ship, orientation, genericFleet, type) {
 		if (type == "random") randomSetup(genericFleet);
 		else $(".text").text(output.overlap);
 	}
- } // end of setShip()
-
+ } 
  function checkOverlap(location, length, orientation, genFleet) {
  	var loc = location;
  	if (orientation == "horz") {
@@ -702,8 +670,8 @@ function setShip(location, ship, orientation, genericFleet, type) {
 	 				if (genFleet == cpuFleet) randomSetup(genFleet);
 	 				else return true;
 	 			}
-	 		} // end of for loop
-	 	} // end of for loop
+	 		} 
+	 	} 
 	 } else {
 	 	var end = location + (10 * length);
 	 	for (; location < end; location += 10) {
@@ -714,17 +682,16 @@ function setShip(location, ship, orientation, genericFleet, type) {
 	 			}
 	 		}
 	 	}
-	 } // end of if/else 
+	 }
 	if (genFleet == cpuFleet && genFleet.currentShip < genFleet.numOfShips) {
 		if (orientation == "horz") genFleet.ships[genFleet.currentShip++].populateHorzHits(loc);
 	 	else genFleet.ships[genFleet.currentShip++].populateVertHits(loc);
 	 	if (genFleet.currentShip == genFleet.numOfShips) {
-	 		// clear the call stack
 	 		setTimeout(startGame, 500);
 	 	} else randomSetup(genFleet);
 	 }
 	return false;
- } // end of checkOverlap()
+ }
 
 
 function startGame() {
@@ -732,7 +699,6 @@ function startGame() {
  		$(".console").css( { "margin-top" : "31px" } );
  	});
  	$(".text").text(output.start);
- 	// Generate all possible hits for Player 1
  	for (var i = 0; i < 100; i++) bot.randPool[i] = i + 1;
  	highlightBoard();
  }
@@ -742,7 +708,6 @@ function startGame() {
  		$(".top").find(".points").off("mouseenter").off("mouseleave").off("click");
  	} else {
 	 	$(".top").find(".points").off("mouseenter mouseover").on("mouseenter mouseover", function() {
-			// only allow target highlight on none attempts
 			if(!($(this).hasClass("used"))) topBoard.highlight(this);
 		});
 	 }
